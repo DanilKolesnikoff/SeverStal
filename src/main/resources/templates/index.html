@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Заметки</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<h1>Мои заметки</h1>
+<a href="/new">Создать новую заметку</a>
+<ul>
+    <li th:each="note : ${notes}">
+        <a th:href="@{/edit/{id}(id=${note.id})}" th:text="${note.content}"></a>
+        <a th:href="@{/delete/{id}(id=${note.id})}">Удалить</a>
+    </li>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <button type="submit">Загрузить изображение</button>
+    </form>
+    <div th:each="note : ${notes}">
+        <div th:utext="${note.content}"></div>
+        <img th:if="${note.imageFilename}" th:src="@{/uploads/{filename}(filename=${note.imageFilename})}" alt="Image" />
+    </div>
+</ul>
+</body>
+</html>
