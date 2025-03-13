@@ -1,9 +1,8 @@
 package com.example.notes.model;
+import jakarta.persistence.*;
+import jakarta.persistence.Lob;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.util.Base64;
 
 @Entity
 public class Note {
@@ -12,15 +11,8 @@ public class Note {
     private Long id;
     private String content;
 
-    private String imageFilename;
-
-    public String getImageFilename() {
-        return imageFilename;
-    }
-
-    public void setImageFilename(String imageFilename) {
-        this.imageFilename = imageFilename;
-    }
+    @Lob
+    private byte[] image;
 
     public Long getId() {
         return id;
@@ -36,5 +28,20 @@ public class Note {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public String getImageBase64() {
+        if (image == null) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(image);
     }
 }

@@ -1,17 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Редактирование заметки</title>
+    <title>Редактирование записки</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<h1>Редактирование заметки</h1>
-<form th:action="@{/save}" th:object="${note}" method="post">
-    <input type="hidden" th:field="*{id}"/>
-    <textarea th:field="*{content}" rows="10" cols="50"></textarea>
-    <br/>
-    <button type="submit">Сохранить</button>
-</form>
-<a href="/">Назад к списку</a>
+<h1>Редактирование записки</h1>
+<div class="container">
+    <form th:action="@{/save}" th:object="${note}" method="post" enctype="multipart/form-data" class="edit-form">
+        <input type="hidden" th:field="*{id}"/>
+        <textarea th:field="*{content}" rows="10" placeholder="Введите текст записки..."></textarea>
+        <input type="file" name="file" accept="image/*"/>
+        <button type="submit" class="button">
+            <i class="fas fa-save"></i> Сохранить
+        </button>
+    </form>
+    <div th:if="${note.imageBase64}" class="image-preview">
+        <img th:src="@{'data:image/jpeg;base64,' + ${note.imageBase64}}" alt="Image" class="note-image" />
+        <a th:href="@{/remove-image/{id}(id=${note.id})}" class="button delete">
+            <i class="fas fa-trash"></i> Удалить изображение
+        </a>
+    </div>
+    <a href="/" class="button">
+        <i class="fas fa-arrow-left"></i> Назад к списку
+    </a>
+</div>
 </body>
 </html>

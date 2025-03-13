@@ -2,6 +2,8 @@ package com.example.notes.controller;
 
 import com.example.notes.model.Note;
 import com.example.notes.repository.NoteRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,12 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Controller
 public class NoteController {
+
 
     @Autowired
     private NoteRepository noteRepository;
@@ -24,6 +24,11 @@ public class NoteController {
         model.addAttribute("notes", noteRepository.findAll());
         return "index";
     }
+    @GetMapping("/new")
+    public String newNote(Model model) {
+        model.addAttribute("note", new Note());
+        return "edit";
+    }
 
     @GetMapping("/edit/{id}")
     public String editNote(@PathVariable Long id, Model model) {
@@ -32,7 +37,10 @@ public class NoteController {
     }
 
     @PostMapping("/save")
-    public String saveNote(@ModelAttribute Note note) {
+    public String saveNote(@ModelAttribute Note note, @RequestParam("file") MultipartFile file) throws IOException {
+        if (!file.isEmpty() && isImage(file)) {
+            note.setImage(file.getBytes());
+        }
         noteRepository.save(note);
         return "redirect:/";
     }
@@ -43,23 +51,16 @@ public class NoteController {
         return "redirect:/";
     }
 
-    @GetMapping("/new")
-    public String newNote(Model model) {
-        model.addAttribute("note", new Note());
-        return "edit";
+    @GetMapping("/remove-image/{id}")
+    public String removeImage(@PathVariable Long id) {
+        Note note = noteRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid note Id:" + id));
+        note.setImage(null);
+        noteRepository.save(note);
+        return "redirect:/edit/" + id;
     }
 
-    @PostMapping("/upload")
-    public String uploadImage(@RequestParam("file") MultipartFile file) {
-        if (!file.isEmpty()) {
-            try {
-                byte[] bytes = file.getBytes();
-                Path path = Paths.get("src/main/resources/static/uploads/" + file.getOriginalFilename());
-                Files.write(path, bytes);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return "redirect:/";
+    private boolean isImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && contentType.startsWith("image");
     }
 }
